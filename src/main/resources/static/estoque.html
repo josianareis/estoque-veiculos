@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque de veículos</title>
+    <style>
+        * {
+        box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        header,
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+       }
+       header {
+            margin-bottom: 24px;
+       }
+       h1 {
+            color: #173b63;
+       }
+       section {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+       }
+        button {
+            background-color: #173b63;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+       }
+       button:hover {
+            background-color: #245587;
+       }
+       button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+       }
+       table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+       }
+       th,
+       td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #d1d5db;
+       }
+    th {
+            background-color: #e8eef5;
+       }
+            #mensagem {
+            min-height: 24px;
+       }
+    </style>
+</head>
+
+
+<body>
+    <header>
+        <h1>Gestão de estoque de veículos</h1>
+        <p>Cadastro, consulta e atualização dos veículos.</p>
+    </header>
+
+    <main>
+        <section>
+        <h2>Cadastrar marca</h2>
+
+           <form id="formMarca">
+             <label for="nomeMarca">Nome da marca</label>
+             <input type="text" id="nomeMarca" required>
+
+             <button type="submit">Cadastrar marca</button>
+           </form>
+
+           <p id="mensagemMarca" role="status"></p>
+        </section>
+
+        <section>
+           <h2>Cadastrar modelo</h2>
+
+           <form id="formModelo">
+               <p>
+                   <label for="marcaDoModelo">Marca</label>
+                   <select id="marcaDoModelo" required>
+                       <option value="">Selecione uma marca</option>
+                   </select>
+               </p>
+
+               <p>
+                   <label for="nomeModelo">Nome do modelo</label>
+                   <input type="text" id="nomeModelo" required>
+               </p>
+
+               <button type="submit">Cadastrar modelo</button>
+            </form>
+
+            <p id="mensagemModelo" role="status"></p>
+         </section>
+
+
+
+
+        <section>
+           <h2>Cadastrar veículo</h2>
+
+           <form id="formVeiculo">
+           <p>
+            <label for="cadastroModelo">Modelo</label>
+            <select id="cadastroModelo" required>
+                <option value="">Selecione um modelo</option>
+            </select>
+           </p>
+           <p>
+            <label for="cadastroAno">Ano de fabricação</label>
+            <input id="cadastroAno" type="number" min="1" step="1" required>
+           </p>
+           <p>
+            <label for="cadastroCor">Cor</label>
+            <input id="cadastroCor" type="text" maxlength="255" required>
+           </p>
+           <p>
+            <label for="cadastroPreco">Preço (R$)</label>
+            <input id="cadastroPreco" type="number" min="0.01"
+                   max="9999999999.99" step="0.01" required>
+           </p>
+           <p>
+            <label for="cadastroQuilometragem">Quilometragem (km)</label>
+            <input id="cadastroQuilometragem" type="number" min="0"
+                   max="2147483647" step="1" required>
+           </p>
+           <p>
+            <label for="cadastroStatus">Status</label>
+            <select id="cadastroStatus" required>
+                <option value="DISPONIVEL">Disponível</option>
+                <option value="RESERVADO">Reservado</option>
+                <option value="VENDIDO">Vendido</option>
+            </select>
+           </p>
+
+            <button type="submit" id="btnCadastrar">Cadastrar veículo</button>
+            <p id="mensagemCadastro" role="status"></p>
+           </form>
+        </section>
+
+        <section id="secaoEdicao" hidden>
+           <h2>Editar veículo <span id="tituloEdicao"></span></h2>
+
+           <form id="formEdicao">
+              <p>
+                  <label for="edicaoPreco">Preço (R$)</label>
+                  <input id="edicaoPreco" type="number" min="0.01"
+                   max="9999999999.99" step="0.01" required>
+             </p>
+              <p>
+                  <label for="edicaoQuilometragem">Quilometragem (km)</label>
+                  <input id="edicaoQuilometragem" type="number" min="0"
+                   max="2147483647" step="1" required>
+            </p>
+              <p>
+                  <label for="edicaoStatus">Status</label>
+                  <select id="edicaoStatus" required>
+                      <option value="DISPONIVEL">Disponível</option>
+                      <option value="RESERVADO">Reservado</option>
+                      <option value="VENDIDO">Vendido</option>
+            </select>
+            </p>
+
+                 <button type="submit" id="btnSalvarEdicao">Salvar alterações</button>
+                <button type="button" id="btnCancelarEdicao">Cancelar</button>
+            <p id="mensagemEdicao" role="status"></p>
+          </form>
+        </section>
+        <section>
+            <h2>Veículos no estoque</h2>
+
+            <label for="filtroMarca">Marca:</label>
+            <select id="filtroMarca">
+                <option value="">Todas</option>
+            </select>
+
+            <label for="filtroModelo">Modelo:</label>
+            <select id="filtroModelo">
+                <option value="">Todos</option>
+            </select>
+
+            <label for="filtroAno">Ano:</label>
+            <input type="number" id="filtroAno" min="1" step="1">
+
+            <label for="filtroPrecoMin">Preço mínimo:</label>
+            <input type="number" id="filtroPrecoMin" min="0" step="0.01">
+
+            <label for="filtroPrecoMax">Preço máximo:</label>
+            <input type="number" id="filtroPrecoMax" min="0" step="0.01">
+
+            <label for="filtroStatus">Status:</label>
+
+            <select id="filtroStatus">
+                <option value="">Todos</option>
+                <option value="DISPONIVEL">Disponível</option>
+                <option value="RESERVADO">Reservado</option>
+                <option value="VENDIDO">Vendido</option>
+            </select>
+
+            <button type="button" id="btnAtualizar">
+                Atualizar lista
+            </button>
+
+            <p id="mensagem" role="status"></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Marca</th>
+                        <th scope="col">Modelo</th>
+                        <th scope="col">Ano</th>
+                        <th scope="col">Cor</th>
+                        <th scope="col">Preço</th>
+                        <th scope="col">Quilometragem</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ações</th> 
+                    </tr>
+                </thead>
+                <tbody id="listaVeiculos">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+    const listaVeiculos = document.getElementById("listaVeiculos");
+    const mensagem = document.getElementById("mensagem");
+    const btnAtualizar = document.getElementById("btnAtualizar");
+    const filtroStatus = document.getElementById("filtroStatus");
+    const filtroAno = document.getElementById("filtroAno");
+    const filtroPrecoMin = document.getElementById("filtroPrecoMin");
+    const filtroPrecoMax = document.getElementById("filtroPrecoMax");
+    const filtroMarca = document.getElementById("filtroMarca");
+    const filtroModelo = document.getElementById("filtroModelo");
+    const formVeiculo = document.getElementById("formVeiculo");
+    const cadastroModelo = document.getElementById("cadastroModelo");
+    const btnCadastrar = document.getElementById("btnCadastrar");
+    const mensagemCadastro = document.getElementById("mensagemCadastro");
+
+    async function carregarMarcasEModelos() {
+       try {
+            const respostaMarcas = await fetch("/marcas");
+            const respostaModelos = await fetch("/modelos");
+
+            if (!respostaMarcas.ok || !respostaModelos.ok) {
+            throw new Error("Não foi possível carregar marcas e modelos.");
+        }
+
+            const marcas = await respostaMarcas.json();
+            const modelos = await respostaModelos.json();
+
+            filtroMarca.replaceChildren(new Option("Todas", ""));
+            filtroModelo.replaceChildren(new Option("Todos", ""));
+
+            for (const marca of marcas) {
+            filtroMarca.add(new Option(marca.nome, marca.id));
+            document.getElementById("marcaDoModelo").add(
+               new Option(marca.nome, marca.id)
+           );
+        }
+
+            cadastroModelo.replaceChildren(new Option("Selecione um modelo", ""));
+
+            for (const modelo of modelos) {
+              const nomeCompleto = modelo.marca.nome + " - " + modelo.nome;
+
+            filtroModelo.add(new Option(nomeCompleto, modelo.id));
+            cadastroModelo.add(new Option(nomeCompleto, modelo.id));
+        }
+
+           } catch (erro) {
+           mensagem.textContent = erro.message;
+        }
+    }
+    async function carregarVeiculos() {
+        mensagem.textContent = "Carregando veículos...";
+        btnAtualizar.disabled = true;
+
+        try {
+           const parametros = new URLSearchParams();
+           if (filtroMarca.value !== "") {
+         parametros.set("marcaId", filtroMarca.value);
+        }
+
+           if (filtroModelo.value !== "") {
+         parametros.set("modeloId", filtroModelo.value);
+        }
+           if (filtroAno.value !== "") {
+            parametros.set("ano", filtroAno.value);
+       }
+
+           if (filtroPrecoMin.value !== "") {
+            parametros.set("precoMin", filtroPrecoMin.value);
+       }
+
+           if (filtroPrecoMax.value !== "") {
+            parametros.set("precoMax", filtroPrecoMax.value);
+       }
+
+           if (filtroStatus.value !== "") {
+           parametros.set("status", filtroStatus.value);
+            }
+
+           const resposta = await fetch("/veiculos?" + parametros.toString());
+
+           if (!resposta.ok) {
+            const erro = await resposta.json();
+
+           throw new Error(
+           erro.mensagem || "Não foi possível carregar os veículos."
+             );
+            }
+
+            const veiculos = await resposta.json();
+
+            listaVeiculos.replaceChildren();
+
+            for (const veiculo of veiculos) {
+                const linha = document.createElement("tr");
+
+                const valores = [
+                    veiculo.id,
+                    veiculo.modelo.marca.nome,
+                    veiculo.modelo.nome,
+                    veiculo.anoFabricacao,
+                    veiculo.cor,
+                    veiculo.preco.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL"
+                    }),
+                    veiculo.quilometragem.toLocaleString("pt-BR") + " km",
+                    veiculo.status
+                ];
+
+                for (const valor of valores) {
+                    const coluna = document.createElement("td");
+                    coluna.textContent = valor;
+                    linha.appendChild(coluna);
+                }
+
+                    const colunaAcoes = document.createElement("td");
+                    const botaoEditar = document.createElement("button");
+
+                    botaoEditar.type = "button";
+                    botaoEditar.textContent = "Editar";
+                    botaoEditar.addEventListener("click", () => abrirEdicao(veiculo));
+
+                    colunaAcoes.appendChild(botaoEditar);
+                    const botaoExcluir = document.createElement("button");
+                    botaoExcluir.type = "button";
+                    botaoExcluir.textContent = "Excluir";
+                    botaoExcluir.style.marginLeft = "8px";
+
+                    botaoExcluir.addEventListener("click", async () => {
+                         const confirmou = window.confirm(
+                            "Excluir o veículo #" + veiculo.id + " do estoque?"
+                        );
+
+                         if (!confirmou) {
+                             return;
+                        }
+
+                         botaoExcluir.disabled = true;
+
+                         try {
+                          const resposta = await fetch("/veiculos/" + veiculo.id, {
+                               method: "DELETE"
+                          });
+
+                         if (!resposta.ok) {
+                             const erro = await resposta.json().catch(() => null);
+                             throw new Error(erro?.mensagem || "Não foi possível excluir o veículo.");
+                        }
+
+                         if (idEmEdicao === veiculo.id) {
+                             secaoEdicao.hidden = true;
+                             idEmEdicao = null;
+                        }
+
+                         await carregarVeiculos();
+                        } catch (erro) {
+                         mensagem.textContent = erro.message;
+                        } finally {
+                         botaoExcluir.disabled = false;
+                        }
+               });
+
+                colunaAcoes.appendChild(botaoExcluir);
+
+                    linha.appendChild(colunaAcoes);
+
+                listaVeiculos.appendChild(linha);
+            }
+
+            mensagem.textContent = veiculos.length === 0
+                ? "Nenhum veículo encontrado."
+                : "Veículos carregados: " + veiculos.length;
+
+        } catch (erro) {
+            listaVeiculos.replaceChildren();
+            mensagem.textContent = erro.message;
+        } finally {
+            btnAtualizar.disabled = false;
+        }
+            }
+
+    btnAtualizar.addEventListener("click", carregarVeiculos);
+
+        async function iniciarPagina() {
+        await carregarVeiculos();
+        await carregarMarcasEModelos();
+            }
+
+
+    formVeiculo.addEventListener("submit", async function (evento) {
+    evento.preventDefault();
+
+    btnCadastrar.disabled = true;
+    mensagemCadastro.textContent = "Cadastrando veículo...";
+
+    try {
+        const dados = {
+            modelo: { id: Number(cadastroModelo.value) },
+            anoFabricacao: document.getElementById("cadastroAno").valueAsNumber,
+            cor: document.getElementById("cadastroCor").value.trim(),
+            preco: document.getElementById("cadastroPreco").valueAsNumber,
+            quilometragem: document.getElementById("cadastroQuilometragem").valueAsNumber,
+            status: document.getElementById("cadastroStatus").value
+        };
+
+        const resposta = await fetch("/veiculos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados)
+        });
+
+        if (!resposta.ok) {
+            const erro = await resposta.json().catch(() => null);
+            throw new Error(erro?.mensagem || "Não foi possível cadastrar o veículo.");
+        }
+
+        formVeiculo.reset();
+        mensagemCadastro.textContent = "Veículo cadastrado com sucesso!";
+        await carregarVeiculos();
+        } catch (erro) {
+        mensagemCadastro.textContent = erro.message;
+        } finally {
+        btnCadastrar.disabled = false;
+        }
+    });
+
+         const secaoEdicao = document.getElementById("secaoEdicao");
+         const tituloEdicao = document.getElementById("tituloEdicao");
+         const formEdicao = document.getElementById("formEdicao");
+         const edicaoPreco = document.getElementById("edicaoPreco");
+         const edicaoQuilometragem = document.getElementById("edicaoQuilometragem");
+         const edicaoStatus = document.getElementById("edicaoStatus");
+         const btnSalvarEdicao = document.getElementById("btnSalvarEdicao");
+         const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
+         const mensagemEdicao = document.getElementById("mensagemEdicao");
+
+         let idEmEdicao = null;
+
+         function abrirEdicao(veiculo) {
+             if (btnSalvarEdicao.disabled) {
+                 return;
+         } 
+
+         idEmEdicao = veiculo.id;
+         tituloEdicao.textContent = "#" + veiculo.id;
+         edicaoPreco.value = veiculo.preco;
+         edicaoQuilometragem.value = veiculo.quilometragem;
+         edicaoStatus.value = veiculo.status;
+         mensagemEdicao.textContent = "";
+
+         secaoEdicao.hidden = false;
+         edicaoPreco.focus();
+        }
+
+         btnCancelarEdicao.addEventListener("click", () => {
+         secaoEdicao.hidden = true;
+         idEmEdicao = null;
+      });
+
+         formEdicao.addEventListener("submit", async (evento) => {
+             evento.preventDefault();
+
+         btnSalvarEdicao.disabled = true;
+         btnCancelarEdicao.disabled = true;
+         mensagemEdicao.textContent = "Salvando alterações...";
+
+         try {
+             const dados = {
+                 preco: edicaoPreco.valueAsNumber,
+                 quilometragem: edicaoQuilometragem.valueAsNumber,
+                 status: edicaoStatus.value
+            };
+
+             const resposta = await fetch("/veiculos/" + idEmEdicao, {
+                 method: "PATCH",
+                 headers: { "Content-Type": "application/json" },
+                 body: JSON.stringify(dados)
+            });
+
+             if (!resposta.ok) {
+                 const erro = await resposta.json().catch(() => null);
+                 throw new Error(erro?.mensagem || "Não foi possível atualizar o veículo.");
+            } 
+
+             mensagemEdicao.textContent = "Veículo atualizado com sucesso!";
+                 await carregarVeiculos();
+            } catch (erro) {
+             mensagemEdicao.textContent = erro.message;
+            } finally {
+             btnSalvarEdicao.disabled = false;
+             btnCancelarEdicao.disabled = false;
+            }
+       });
+
+    iniciarPagina();
+             const formMarca = document.getElementById("formMarca");
+             const nomeMarca = document.getElementById("nomeMarca");
+             const mensagemMarca = document.getElementById("mensagemMarca");
+
+             formMarca.addEventListener("submit", async (evento) => {
+                 evento.preventDefault();
+
+                 const nome = nomeMarca.value.trim();
+
+                 if (!nome) {
+                       mensagemMarca.textContent = "Informe o nome da marca.";
+                       nomeMarca.focus();
+                       return;
+                }
+
+                 const botao = formMarca.querySelector('button[type="submit"]');
+                       botao.disabled = true;
+                       mensagemMarca.textContent = "Cadastrando marca...";
+
+                try {
+                 const resposta = await fetch("/marcas", {
+                       method: "POST",
+                       headers: { "Content-Type": "application/json" },
+                       body: JSON.stringify({ nome })
+                });
+
+                if (!resposta.ok) {
+                  const erro = await resposta.json().catch(() => null);
+                       throw new Error(erro?.mensagem || "Não foi possível cadastrar a marca.");
+                }
+
+                        formMarca.reset();
+                        mensagemMarca.textContent = "Marca cadastrada com sucesso!";
+                } catch (erro) {
+                        mensagemMarca.textContent = erro.message;
+                } finally {
+                        botao.disabled = false;
+               }
+           });
+                  const formModelo = document.getElementById("formModelo");
+
+                  formModelo.addEventListener("submit", async (evento) => {
+                      evento.preventDefault();
+
+                  const marcaId = Number(document.getElementById("marcaDoModelo").value);
+                  const nome = document.getElementById("nomeModelo").value.trim();
+                  const mensagemModelo = document.getElementById("mensagemModelo");
+                  const botao = formModelo.querySelector('button[type="submit"]');
+
+                 if (!marcaId || !nome) {
+                   mensagemModelo.textContent = "Selecione a marca e informe o nome do modelo.";
+                  return;
+                }
+
+                  botao.disabled = true;
+                  mensagemModelo.textContent = "Cadastrando modelo...";
+
+                 try {
+                  const resposta = await fetch("/modelos", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                       body: JSON.stringify({ nome, marca: { id: marcaId } })
+                    });
+
+                 if (!resposta.ok) {
+                  const erro = await resposta.json().catch(() => null);
+                  throw new Error(erro?.mensagem || "Não foi possível cadastrar o modelo.");
+                    }
+
+                    formModelo.reset();
+                    mensagemModelo.textContent = "Modelo cadastrado com sucesso!";
+                } catch (erro) {
+                    mensagemModelo.textContent = erro.message;
+                } finally {
+                    botao.disabled = false;
+                }
+           });
+
+                 
+</script>
+
+
+</body>
+</html>
